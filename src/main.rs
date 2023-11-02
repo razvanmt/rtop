@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use axum::{Router, Server, routing::get, extract::State, Json, response::IntoResponse};
+use axum::{Router, Server, routing::get, extract::State, Json, response::{IntoResponse, Html}};
 use sysinfo::{CpuExt, System, SystemExt};
 
 #[tokio::main]
@@ -24,9 +24,9 @@ struct AppState{
     sys: Arc<Mutex<System>>,
 }
 
-
-async fn root_get() -> &'static str {
-    "Hello, World!"
+#[axum::debug_handler]
+async fn root_get() -> impl IntoResponse {
+    Html(include_str!("index.html"))
 }
 
 #[axum::debug_handler]
