@@ -9,20 +9,22 @@ function App(props) {
     return html`
     <div>
     ${props.cpus.map((cpu) => {
-        return html `<div>${cpu.toFixed(2)}% usage</div> `;
+        return html `<div class="bar">
+        <div class="bar-inner" style="width: ${cpu}%"></div>
+        <span class="label">
+        ${cpu.toFixed(2)}% usage
+        </span>
+        </div>`;
     })}
     </div>
     `;
 }
 
-setInterval(async() => {
-    let response = await fetch('/api/cpus');
-    if (response.status !== 200){
-        throw new Error(`Error! Status code: ${response.status}`);
-    }
-    let json = await response.json();
-    
-    const app = h("pre", null, JSON.stringify(json, null, 2));
+let url = new URL("/api/cpus", window.location.href);
+url.protocol = url.protocol.replace("http", "ws");
 
-    render(html`<${App} cpus=${json}></${App}>`, document.body);
-}, 100);
+let ws = new WebSocket(url.href);
+ws.onmessage = (ev) => {
+  let json = JSON.parse(ev.data);
+  render(html`<${App} cpus=${json}></${App}>`, document.body);
+};
